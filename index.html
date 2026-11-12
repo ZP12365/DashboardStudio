@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gaul Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f7f4ef; --card:#ffffff; --ink:#1d1b2e; --muted:#6f6b7d; --line:#e4dfd6;
+  --teal:#1f5c5a; --income:#2f6f4e; --expense:#a1452f; --soft:#ece7de;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#16151f; --card:#201f2c; --ink:#f1eee8; --muted:#a6a1b4; --line:#34323f; --teal:#6fb7b2; --income:#7fc79a; --expense:#e39a84; --soft:#2a2834;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:"DM Sans",system-ui,sans-serif; background:var(--paper); color:var(--ink);
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  font-size:15px; line-height:1.5;
+}
+header{padding:22px 20px 14px;max-width:1040px;margin:auto}
+header h1{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:32px;margin:0}
+header p{margin:4px 0 0;color:var(--muted)}
+nav{display:flex;gap:4px;padding:0 20px;max-width:1040px;margin:auto;border-bottom:1px solid var(--line);overflow-x:auto}
+nav button{background:none;border:0;padding:10px 12px;color:var(--muted);font:inherit;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+nav button.active{color:var(--ink);border-bottom-color:var(--teal);font-weight:700}
+main{max-width:1040px;margin:auto;padding:20px}
+section.hide{display:none}
+h2{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:24px;margin:8px 0 12px}
+h3{font-size:16px;margin:0 0 10px}
+.panel{background:var(--card);border:1px solid var(--line);padding:18px;margin-bottom:16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0;border:1px solid var(--line);background:var(--card);margin-bottom:16px}
+.stat{padding:14px 16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stat .v{font-size:21px;font-weight:700}
+.stat .l{color:var(--muted);font-size:13px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+form .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:12px}
+label{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+input,select{padding:9px 10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font:inherit;border-radius:6px;min-width:0}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+.btn{background:var(--teal);color:#fff;border:0;padding:10px 18px;font:inherit;font-weight:700;cursor:pointer;border-radius:6px}
+.btn.ghost{background:none;color:var(--ink);border:1px solid var(--line)}
+.sm{background:none;border:1px solid var(--line);color:var(--ink);padding:4px 9px;font:inherit;font-size:12px;cursor:pointer;border-radius:6px;margin:2px 0}
+.wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--muted);font-weight:500;font-size:12px;text-transform:none}
+.thumb{width:52px;height:66px;object-fit:cover;background:var(--soft);display:block}
+.tag{display:inline-block;padding:2px 8px;font-size:12px;border:1px solid currentColor;border-radius:4px}
+.t-ok{color:var(--income)} .t-bad{color:var(--expense)} .t-mute{color:var(--muted)}
+.hint{color:var(--muted);font-size:13px;margin:6px 0 0}
+.bars{display:flex;align-items:flex-end;gap:10px;height:160px;border-bottom:1px solid var(--line);padding-top:8px}
+.bgroup{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:12px;color:var(--muted)}
+.pair{display:flex;gap:3px;align-items:flex-end;height:100%;width:100%;justify-content:center}
+.bar{width:40%;min-height:2px}
+.bar.in{background:var(--income)} .bar.out{background:var(--expense)}
+.legend{font-size:12px;color:var(--muted);display:flex;gap:14px;margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:middle}
+.progress{height:6px;background:var(--soft);margin-top:4px}
+.progress div{height:100%;background:var(--teal)}
+.list-item{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.empty{color:var(--muted);padding:12px 0}
+.preview{margin-top:10px;padding:10px 12px;background:var(--soft);font-size:14px}
+textarea{width:100%;min-height:140px;font:12px ui-monospace,monospace;padding:8px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:6px}
+:root{--paper:#f3f0ff;--card:#ffffff;--ink:#15122b;--muted:#6b6686;--line:#dcd6f0;--teal:#6a2cf5;--income:#0f9d6a;--expense:#f0436a;--soft:#ebe6ff}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--paper:#100e1d;--card:#1a1730;--ink:#f3f0ff;--muted:#9c96bd;--line:#2d2950;--teal:#a98bff;--income:#5fd6a0;--expense:#ff7d98;--soft:#23203d}
+}
+body{font-family:Inter,system-ui,sans-serif}
+header{padding:36px 20px 18px}
+header h1{font-family:"Bricolage Grotesque",Inter,sans-serif;font-weight:800;font-size:clamp(46px,10vw,88px);letter-spacing:-0.04em;line-height:.92}
+header h1::after{content:"";display:block;width:64px;height:8px;margin-top:10px;background:#d8ff5c;border-radius:999px}
+header p{font-size:15px}
+h2,h3{font-family:"Bricolage Grotesque",Inter,sans-serif;font-weight:800;letter-spacing:-0.01em}
+nav{border-bottom:0;gap:8px;padding-bottom:16px}
+nav button{border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);padding:9px 16px;font-weight:500}
+nav button.active{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:700}
+nav button.active{border-bottom-color:transparent}
+.panel{border:0;border-radius:22px;box-shadow:0 1px 0 var(--line);padding:22px}
+.stats{border:0;gap:12px;background:none;border-radius:0}
+.stat{border:0;background:var(--card);border-radius:20px;padding:18px}
+.stat:first-child{background:var(--ink);color:var(--paper)}
+.stat:first-child .l{color:#b9b3d6}
+.stat .v{font-family:"Bricolage Grotesque",Inter,sans-serif;font-size:28px;font-weight:800;letter-spacing:-0.02em}
+.btn{border-radius:999px;padding:11px 22px;font-weight:700;background:var(--teal)}
+.btn.ghost{border-radius:999px}
+input,select,textarea{border-radius:12px}
+.sm{border-radius:999px;padding:5px 12px}
+.thumb{border-radius:12px}
+.tag{border-radius:999px;padding:3px 10px;border-width:1px}
+.bar{border-radius:10px 10px 0 0}
+.bar.in{background:var(--income)}
+.bar.out{background:var(--expense)}
+.progress{border-radius:999px;height:8px}
+.progress div{border-radius:999px;background:var(--teal)}
+.list-item{border-bottom:1px dashed var(--line)}
+</style>
+</head>
+<body>
+
+<header>
+  <h1 id="brandName">Gaul Studio</h1>
+  <p id="todayLabel"></p>
+</header>
+
+<nav>
+  <button data-tab="dash" class="active">Ringkasan</button>
+  <button data-tab="stock">Stok baju</button>
+  <button data-tab="rent">Sewa</button>
+  <button data-tab="exp">Pengeluaran</button>
+  <button data-tab="settings">Pengaturan</button>
+  <button data-tab="backup">Backup</button>
+</nav>
+
+<main>
+
+<!-- RINGKASAN -->
+<section id="dash"></section>
+
+<!-- STOK -->
+<section id="stock" class="hide">
+  <div class="panel">
+    <h3>Tambah baju</h3>
+    <form id="itemForm">
+      <div class="row">
+        <label>Kode<input id="i_code" required placeholder="KBY-001"></label>
+        <label>Nama baju<input id="i_name" required placeholder="Kebaya brokat merah"></label>
+        <label>Kategori
+          <select id="i_cat">
+            <option>Kebaya</option><option>Gaun</option><option>Jas</option><option>Batik</option><option>Lainnya</option>
+          </select>
+        </label>
+        <label>Ukuran<input id="i_size" placeholder="M / L / 36"></label>
+        <label>Warna<input id="i_color" placeholder="Merah"></label>
+      </div>
+      <div class="row">
+        <label>Harga beli (Rp)<input id="i_buy" type="number" min="0" required></label>
+        <label>Harga sewa per hari (Rp)<input id="i_rent" type="number" min="0" required></label>
+        <label>Kondisi
+          <select id="i_cond"><option>Baik</option><option>Cukup</option><option>Perlu perbaikan</option></select>
+        </label>
+        <label>Tanggal beli<input id="i_bought" type="date"></label>
+        <label>Foto baju<input id="i_photo" type="file" accept="image/*"></label>
+      </div>
+      <p class="hint">Foto otomatis diperkecil supaya data tidak cepat penuh.</p>
+      <button class="btn" type="submit">Simpan baju</button>
+    </form>
+  </div>
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <h3 style="margin:0">Daftar stok</h3>
+      <input id="searchItem" placeholder="Cari kode, nama, kategori" oninput="renderStock()">
+    </div>
+    <div class="wrap" id="itemList" style="margin-top:12px"></div>
+  </div>
+</section>
+
+<!-- SEWA -->
+<section id="rent" class="hide">
+  <div class="panel">
+    <h3>Catat sewa baru</h3>
+    <form id="rentForm">
+      <div class="row">
+        <label>Baju
+          <select id="r_item" required></select>
+        </label>
+        <label>Nama penyewa<input id="r_cust" required></label>
+        <label>No. HP<input id="r_phone"></label>
+        <label>Tanggal ambil<input id="r_start" type="date" required></label>
+        <label>Lama sewa (hari)<input id="r_days" type="number" min="1" value="3" required></label>
+      </div>
+      <div class="row">
+        <label>Deposit (Rp)<input id="r_deposit" type="number" min="0" value="0"></label>
+        <label>Status bayar
+          <select id="r_paid"><option value="1">Lunas</option><option value="0">Belum lunas</option></select>
+        </label>
+      </div>
+      <div class="preview" id="rentPreview"></div>
+      <button class="btn" type="submit" style="margin-top:12px">Simpan sewa</button>
+      <p class="hint" id="rentMsg"></p>
+    </form>
+  </div>
+  <div class="panel">
+    <h3>Riwayat sewa</h3>
+    <div class="wrap" id="rentList"></div>
+  </div>
+</section>
+
+<!-- PENGELUARAN -->
+<section id="exp" class="hide">
+  <div class="panel">
+    <h3>Catat pengeluaran</h3>
+    <form id="expForm">
+      <div class="row">
+        <label>Tanggal<input id="e_date" type="date" required></label>
+        <label>Kategori
+          <select id="e_cat">
+            <option>Laundry</option><option>Dry clean</option><option>Packaging</option><option>Iklan</option>
+            <option>Sewa tempat</option><option>Listrik</option><option>Transport</option><option>Perbaikan baju</option><option>Lainnya</option>
+          </select>
+        </label>
+        <label>Jumlah (Rp)<input id="e_amt" type="number" min="0" required></label>
+        <label>Catatan<input id="e_note" placeholder="opsional"></label>
+      </div>
+      <button class="btn" type="submit">Simpan pengeluaran</button>
+    </form>
+  </div>
+  <div class="panel">
+    <h3>Daftar pengeluaran</h3>
+    <div id="expList"></div>
+  </div>
+</section>
+
+<!-- PENGATURAN -->
+<section id="settings" class="hide">
+  <div class="panel" id="setLock">
+    <h3>Masukkan kata sandi</h3>
+    <p class="hint">Pengaturan dikunci supaya tidak berubah tanpa sengaja.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <input id="pwIn" type="password" placeholder="Kata sandi" onkeydown="if(event.key==='Enter')unlock()">
+      <button class="btn" onclick="unlock()">Buka</button>
+    </div>
+    <p class="hint" id="pwMsg"></p>
+  </div>
+  <div id="setBody" class="hide">
+  <div class="panel">
+    <h3>Identitas usaha</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+      <label>Nama usaha<input id="setName"></label>
+      <label>Warna aksen<input id="setAccent" type="color" style="height:42px;padding:4px"></label>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Daftar pilihan</h3>
+    <p class="hint">Tulis satu pilihan per baris. Perubahan langsung terlihat di form.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:10px">
+      <label>Kategori baju<textarea id="setCats"></textarea></label>
+      <label>Kondisi baju<textarea id="setCond"></textarea></label>
+      <label>Kategori pengeluaran<textarea id="setExp"></textarea></label>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" onclick="saveSettings()">Simpan pengaturan</button>
+      <button class="btn ghost" onclick="resetSettings()">Kembalikan ke bawaan</button>
+    </div>
+    <p class="hint" id="setMsg"></p>
+    <p class="hint">Mengganti nama kategori tidak mengubah data lama yang sudah tercatat.</p>
+  </div>
+  <div class="panel">
+    <h3>Ganti kata sandi</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+      <label>Kata sandi baru<input id="pwNew" type="password"></label>
+      <label>Ulangi kata sandi baru<input id="pwNew2" type="password"></label>
+    </div>
+    <div style="margin-top:12px"><button class="btn" onclick="changePw()">Simpan kata sandi baru</button></div>
+    <p class="hint" id="pwMsg2"></p>
+  </div>
+  </div>
+</section>
+
+<!-- BACKUP -->
+<section id="backup" class="hide">
+  <div class="panel">
+    <h3>Backup data</h3>
+    <p class="hint">Data tersimpan di browser ini. Salin teks di bawah dan simpan di catatan atau WhatsApp kamu sebagai cadangan. Untuk memulihkan, tempel lagi teksnya lalu tekan Muat.</p>
+    <textarea id="exportBox" style="margin-top:10px"></textarea>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn ghost" onclick="showExport()">Buat teks backup</button>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Pulihkan data</h3>
+    <textarea id="importBox" placeholder="Tempel teks backup di sini"></textarea>
+    <div style="margin-top:10px"><button class="btn" onclick="importData()">Muat data</button>
+    <span class="hint" id="importMsg"></span></div>
+  </div>
+  <div class="panel" style="border:1px solid #f0436a55">
+    <h3>Reset data</h3>
+    <p class="hint">Pakai jika ingin mulai dari awal. Buat backup dulu di atas, karena data yang dihapus tidak bisa dikembalikan.</p>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn ghost" onclick="resetData('history')">Reset riwayat sewa & pengeluaran</button>
+      <button class="btn" style="background:#f0436a" onclick="resetData('all')">Reset semua data</button>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Sinkronisasi ke Google Sheet</h3>
+    <p class="hint">Data dikirim otomatis ke Google Sheet setiap ada perubahan. Tab Stok, Sewa, dan Pengeluaran bisa dibuka rekan yang kamu beri akses. Perubahan yang diedit langsung di Sheet tidak otomatis kembali ke dashboard.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:10px">
+      <label>URL Apps Script<input id="syncUrl" placeholder="https://script.google.com/macros/s/.../exec"></label>
+      <label>Kata sandi sinkron<input id="syncKey" placeholder="kata rahasia buatan kamu"></label>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn ghost" onclick="saveSync()">Simpan pengaturan</button>
+      <button class="btn" onclick="syncPush()">Kirim ke Sheet sekarang</button>
+      <button class="btn ghost" onclick="syncPull()">Ambil dari Sheet</button>
+    </div>
+    <p class="hint" id="syncMsg"></p>
+  </div>
+</section>
+
+</main>
+
+<script>
+// ===== Data & helpers =====
+const KEY = 'sewabaju-v1';
+let DB = load();
+
+function load(){
+  try{ const s = localStorage.getItem(KEY); if(s){ const d = JSON.parse(s); return {items:d.items||[], rentals:d.rentals||[], expenses:d.expenses||[]}; } }catch(e){}
+  return {items:[], rentals:[], expenses:[]};
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(DB)); }
+  catch(e){ alert('Penyimpanan browser penuh. Hapus foto baju yang tidak perlu atau buat backup.'); }
+  pushSoon();
+}
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rp = n => 'Rp ' + Math.round(Number(n) || 0).toLocaleString('id-ID');
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+function fmt(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+const TODAY = () => fmt(new Date());
+function addDays(s, n){ const d = new Date(s + 'T00:00:00'); d.setDate(d.getDate() + n); return fmt(d); }
+const monthOf = s => (s || '').slice(0, 7);
+const dayDiff = (a, b) => Math.round((new Date(a + 'T00:00:00') - new Date(b + 'T00:00:00')) / 86400000);
+const rentalIncome = r => (r.total || 0) + (r.late || 0) + (r.damage || 0);
+
+function compress(file){
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onerror = rej;
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = rej;
+      img.onload = () => {
+        const max = 400, s = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        res(c.toDataURL('image/jpeg', 0.72));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function activeRental(itemId){
+  const t = TODAY();
+  return DB.rentals.find(r => r.itemId === itemId && !r.returnedOn && r.start <= t);
+}
+function conflicts(itemId, start, end){
+  return DB.rentals.some(r => r.itemId === itemId && !r.returnedOn && r.start < end && start < r.end);
+}
+
+// ===== Tabs =====
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('active', x === b));
+  document.querySelectorAll('main > section').forEach(s => s.classList.toggle('hide', s.id !== b.dataset.tab));
+});
+
+function renderAll(){
+  renderDash(); renderStock(); renderRentOptions(); renderRentList(); renderExp();
+}
+
+// ===== STOK =====
+$('itemForm').onsubmit = async e => {
+  e.preventDefault();
+  const file = $('i_photo').files[0];
+  let photo = '';
+  if(file){ try{ photo = await compress(file); }catch(err){ alert('Foto tidak bisa dibaca, data baju tetap disimpan tanpa foto.'); } }
+  DB.items.push({
+    id: uid(), code: $('i_code').value.trim(), name: $('i_name').value.trim(),
+    cat: $('i_cat').value, size: $('i_size').value.trim(), color: $('i_color').value.trim(),
+    buy: +$('i_buy').value || 0, rent: +$('i_rent').value || 0, cond: $('i_cond').value,
+    bought: $('i_bought').value || TODAY(), photo
+  });
+  save(); e.target.reset(); renderAll();
+};
+
+function renderStock(){
+  const q = ($('searchItem').value || '').toLowerCase();
+  const rows = DB.items.filter(i => (i.code + ' ' + i.name + ' ' + i.cat).toLowerCase().includes(q));
+  if(!DB.items.length){ $('itemList').innerHTML = '<p class="empty">Belum ada baju. Tambahkan dari form di atas.</p>'; return; }
+  if(!rows.length){ $('itemList').innerHTML = '<p class="empty">Tidak ada baju yang cocok.</p>'; return; }
+  $('itemList').innerHTML = `<table>
+    <tr><th></th><th>Kode</th><th>Baju</th><th>Ukuran</th><th>Sewa/hari</th><th>Kondisi</th><th>Status</th><th></th></tr>
+    ${rows.map(i => {
+      const busy = activeRental(i.id);
+      return `<tr>
+        <td>${i.photo ? `<img class="thumb" src="${i.photo}" alt="${esc(i.name)}">` : '<span class="thumb"></span>'}</td>
+        <td>${esc(i.code)}</td>
+        <td>${esc(i.name)}<div class="t-mute" style="font-size:12px">${esc(i.cat)}${i.color ? ' · ' + esc(i.color) : ''}</div></td>
+        <td>${esc(i.size) || '-'}</td>
+        <td>${rp(i.rent)}</td>
+        <td>${esc(i.cond)}</td>
+        <td>${busy ? '<span class="tag t-bad">Disewa</span>' : '<span class="tag t-ok">Tersedia</span>'}</td>
+        <td><button class="sm" onclick="delItem('${i.id}')">Hapus</button></td>
+      </tr>`;
+    }).join('')}
+  </table>`;
+}
+
+function delItem(id){
+  if(DB.rentals.some(r => r.itemId === id)){ alert('Baju ini sudah punya riwayat sewa, jadi tidak bisa dihapus.'); return; }
+  if(!confirm('Hapus baju ini?')) return;
+  DB.items = DB.items.filter(i => i.id !== id); save(); renderAll();
+}
+
+// ===== SEWA =====
+function renderRentOptions(){
+  const sel = $('r_item'), prev = sel.value;
+  sel.innerHTML = DB.items.length
+    ? DB.items.map(i => `<option value="${i.id}">${esc(i.code)} · ${esc(i.name)} (${rp(i.rent)}/hari)</option>`).join('')
+    : '<option value="">Tambahkan baju dulu di menu Stok</option>';
+  if(prev && DB.items.some(i => i.id === prev)) sel.value = prev;
+  updateRentPreview();
+  if(!$('r_start').value) $('r_start').value = TODAY();
+}
+
+function updateRentPreview(){
+  const item = DB.items.find(i => i.id === $('r_item').value);
+  const days = Math.max(1, +$('r_days').value || 1);
+  const start = $('r_start').value || TODAY();
+  if(!item){ $('rentPreview').textContent = ''; return; }
+  const end = addDays(start, days);
+  $('rentPreview').innerHTML = `Total sewa: <b>${rp(item.rent * days)}</b> untuk ${days} hari. Baju kembali pada <b>${end}</b>.`;
+}
+['r_item','r_days','r_start'].forEach(id => $(id).addEventListener('input', updateRentPreview));
+
+$('rentForm').onsubmit = e => {
+  e.preventDefault();
+  const item = DB.items.find(i => i.id === $('r_item').value);
+  if(!item){ $('rentMsg').textContent = 'Pilih baju dulu.'; return; }
+  const days = Math.max(1, +$('r_days').value || 1);
+  const start = $('r_start').value;
+  const end = addDays(start, days);
+  if(conflicts(item.id, start, end)){
+    $('rentMsg').textContent = 'Baju ini sudah disewa di tanggal tersebut. Pilih tanggal lain atau baju lain.';
+    return;
+  }
+  DB.rentals.push({
+    id: uid(), itemId: item.id, cust: $('r_cust').value.trim(), phone: $('r_phone').value.trim(),
+    start, days, end, rate: item.rent, total: item.rent * days,
+    deposit: +$('r_deposit').value || 0, paid: $('r_paid').value === '1',
+    late: 0, damage: 0, returnedOn: null
+  });
+  save();
+  e.target.reset(); $('r_start').value = TODAY(); $('r_days').value = 3;
+  $('rentMsg').textContent = 'Sewa tersimpan.';
+  renderAll();
+};
+
+function rentalStatus(r){
+  if(r.returnedOn) return '<span class="tag t-ok">Dikembalikan</span>';
+  const t = TODAY();
+  if(r.end < t) return '<span class="tag t-bad">Terlambat</span>';
+  if(r.start > t) return '<span class="tag t-mute">Akan datang</span>';
+  return '<span class="tag">Sedang disewa</span>';
+}
+
+function renderRentList(){
+  if(!DB.rentals.length){ $('rentList').innerHTML = '<p class="empty">Belum ada sewa.</p>'; return; }
+  const sorted = [...DB.rentals].sort((a, b) => (a.returnedOn ? 1 : 0) - (b.returnedOn ? 1 : 0) || b.start.localeCompare(a.start));
+  $('rentList').innerHTML = `<table>
+    <tr><th>Baju</th><th>Penyewa</th><th>Ambil</th><th>Kembali</th><th>Total</th><th>Bayar</th><th>Status</th><th></th></tr>
+    ${sorted.map(r => {
+      const item = DB.items.find(i => i.id === r.itemId);
+      return `<tr>
+        <td>${item ? esc(item.code) + ' · ' + esc(item.name) : '<i>baju dihapus</i>'}</td>
+        <td>${esc(r.cust)}<div class="t-mute" style="font-size:12px">${esc(r.phone)}</div></td>
+        <td>${r.start}</td>
+        <td>${r.returnedOn ? r.returnedOn : r.end}</td>
+        <td>${rp(rentalIncome(r))}${r.deposit ? `<div class="t-mute" style="font-size:12px">deposit ${rp(r.deposit)}</div>` : ''}</td>
+        <td>${r.paid ? '<span class="t-ok">Lunas</span>' : '<span class="t-bad">Belum</span>'}</td>
+        <td>${rentalStatus(r)}</td>
+        <td style="white-space:nowrap">
+          <button class="sm" onclick="togglePaid('${r.id}')">${r.paid ? 'Batalkan lunas' : 'Tandai lunas'}</button>
+          ${r.returnedOn ? '' : `<button class="sm" onclick="returnRental('${r.id}')">Kembalikan</button>`}
+          <button class="sm" onclick="delRental('${r.id}')">Hapus</button>
+        </td>
+      </tr>`;
+    }).join('')}
+  </table>`;
+}
+
+function togglePaid(id){
+  const r = DB.rentals.find(x => x.id === id); if(!r) return;
+  r.paid = !r.paid; save(); renderAll();
+}
+function returnRental(id){
+  const r = DB.rentals.find(x => x.id === id); if(!r) return;
+  const late = Math.max(0, dayDiff(TODAY(), r.end));
+  const lateFee = late > 0 ? (+prompt(`Terlambat ${late} hari. Denda telat (Rp)? Kosongkan jika tidak ada.`, '0') || 0) : 0;
+  const dmg = +prompt('Denda kerusakan (Rp)? Isi 0 jika tidak ada.', '0') || 0;
+  r.late = lateFee; r.damage = dmg; r.returnedOn = TODAY();
+  save(); renderAll();
+}
+function delRental(id){
+  if(!confirm('Hapus catatan sewa ini?')) return;
+  DB.rentals = DB.rentals.filter(r => r.id !== id); save(); renderAll();
+}
+
+// ===== PENGELUARAN =====
+$('e_date').value = TODAY();
+$('expForm').onsubmit = e => {
+  e.preventDefault();
+  DB.expenses.push({ id: uid(), date: $('e_date').value || TODAY(), cat: $('e_cat').value, amt: +$('e_amt').value || 0, note: $('e_note').value.trim() });
+  save(); e.target.reset(); $('e_date').value = TODAY(); renderAll();
+};
+function renderExp(){
+  if(!DB.expenses.length){ $('expList').innerHTML = '<p class="empty">Belum ada pengeluaran.</p>'; return; }
+  const sorted = [...DB.expenses].sort((a, b) => b.date.localeCompare(a.date));
+  $('expList').innerHTML = sorted.map(x => `
+    <div class="list-item">
+      <div><b>${esc(x.cat)}</b> <span class="t-mute">· ${x.date}</span>${x.note ? `<div class="t-mute" style="font-size:13px">${esc(x.note)}</div>` : ''}</div>
+      <div style="white-space:nowrap">${rp(x.amt)} <button class="sm" onclick="delExp('${x.id}')">Hapus</button></div>
+    </div>`).join('');
+}
+function delExp(id){
+  if(!confirm('Hapus pengeluaran ini?')) return;
+  DB.expenses = DB.expenses.filter(x => x.id !== id); save(); renderAll();
+}
+
+// ===== RINGKASAN =====
+function renderDash(){
+  const t = TODAY(), m = t.slice(0, 7);
+  $('todayLabel').textContent = new Date().toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+
+  const rentedNow = DB.items.filter(i => activeRental(i.id)).length;
+  const monthRentals = DB.rentals.filter(r => monthOf(r.start) === m);
+  const income = monthRentals.reduce((s, r) => s + rentalIncome(r), 0);
+  const expense = DB.expenses.filter(x => monthOf(x.date) === m).reduce((s, x) => s + x.amt, 0);
+  const receivable = DB.rentals.filter(r => !r.paid).reduce((s, r) => s + rentalIncome(r), 0);
+
+  const pickups = DB.rentals.filter(r => r.start === t);
+  const returns = DB.rentals.filter(r => !r.returnedOn && r.end === t);
+  const overdue = DB.rentals.filter(r => !r.returnedOn && r.end < t);
+
+  // grafik 6 bulan
+  const months = [];
+  for(let k = 5; k >= 0; k--){ const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - k); months.push(fmt(d).slice(0, 7)); }
+  const series = months.map(key => ({
+    key,
+    inc: DB.rentals.filter(r => monthOf(r.start) === key).reduce((s, r) => s + rentalIncome(r), 0),
+    exp: DB.expenses.filter(x => monthOf(x.date) === key).reduce((s, x) => s + x.amt, 0)
+  }));
+  const maxV = Math.max(1, ...series.flatMap(s => [s.inc, s.exp]));
+  const chart = series.map(s => {
+    const label = new Date(s.key + '-01T00:00:00').toLocaleDateString('id-ID', {month:'short'});
+    return `<div class="bgroup">
+      <div class="pair">
+        <div class="bar in" style="height:${(s.inc / maxV * 100).toFixed(1)}%" title="Pemasukan ${rp(s.inc)}"></div>
+        <div class="bar out" style="height:${(s.exp / maxV * 100).toFixed(1)}%" title="Pengeluaran ${rp(s.exp)}"></div>
+      </div>
+      <div style="margin-top:6px">${label}</div>
+    </div>`;
+  }).join('');
+
+  // utilisasi & balik modal
+  const stats = DB.items.map(i => {
+    const rs = DB.rentals.filter(r => r.itemId === i.id);
+    const days = rs.reduce((s, r) => s + r.days, 0);
+    const age = Math.max(1, dayDiff(t, i.bought) || 1);
+    const util = Math.min(100, days / age * 100);
+    const earned = rs.reduce((s, r) => s + rentalIncome(r), 0);
+    const payback = i.buy > 0 ? Math.min(100, earned / i.buy * 100) : 100;
+    return { i, count: rs.length, days, util, earned, payback };
+  }).sort((a, b) => b.count - a.count || b.earned - a.earned);
+
+  const listHtml = (arr, render, empty) => arr.length ? arr.map(render).join('') : `<p class="empty">${empty}</p>`;
+
+  $('dash').innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="v">${DB.items.length}</div><div class="l">Total baju</div></div>
+      <div class="stat"><div class="v">${rentedNow}</div><div class="l">Sedang disewa</div></div>
+      <div class="stat"><div class="v">${DB.items.length - rentedNow}</div><div class="l">Tersedia</div></div>
+      <div class="stat"><div class="v t-ok">${rp(income)}</div><div class="l">Pemasukan bulan ini</div></div>
+      <div class="stat"><div class="v t-bad">${rp(expense)}</div><div class="l">Pengeluaran bulan ini</div></div>
+      <div class="stat"><div class="v">${rp(income - expense)}</div><div class="l">Laba bulan ini</div></div>
+      <div class="stat"><div class="v">${rp(receivable)}</div><div class="l">Belum dibayar</div></div>
+    </div>
+
+    <div class="two">
+      <div class="panel">
+        <h3>Hari ini (${t})</h3>
+        <p class="t-mute" style="margin:0 0 6px;font-size:13px">Diambil</p>
+        ${listHtml(pickups, r => { const it = DB.items.find(i => i.id === r.itemId); return `<div class="list-item"><span>${it ? esc(it.name) : '-'} <span class="t-mute">· ${esc(r.cust)}</span></span><span>${r.days} hari</span></div>`; }, 'Tidak ada pengambilan hari ini.')}
+        <p class="t-mute" style="margin:12px 0 6px;font-size:13px">Dikembalikan hari ini</p>
+        ${listHtml(returns, r => { const it = DB.items.find(i => i.id === r.itemId); return `<div class="list-item"><span>${it ? esc(it.name) : '-'} <span class="t-mute">· ${esc(r.cust)}</span></span></div>`; }, 'Tidak ada pengembalian hari ini.')}
+        ${overdue.length ? `<p class="t-bad" style="margin:12px 0 6px;font-size:13px">Terlambat dikembalikan (${overdue.length})</p>` + overdue.map(r => { const it = DB.items.find(i => i.id === r.itemId); return `<div class="list-item"><span class="t-bad">${it ? esc(it.name) : '-'} · ${esc(r.cust)}</span><span class="t-bad">${dayDiff(t, r.end)} hari</span></div>`; }).join('') : ''}
+      </div>
+
+      <div class="panel">
+        <h3>Pemasukan vs pengeluaran, 6 bulan</h3>
+        <div class="bars">${chart}</div>
+        <div class="legend"><span><i style="background:var(--income)"></i>Pemasukan</span><span><i style="background:var(--expense)"></i>Pengeluaran</span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Performa baju</h3>
+      <p class="hint" style="margin:0 0 10px">Utilisasi = hari disewa dibanding umur baju. Balik modal = pendapatan sewa dibanding harga beli.</p>
+      ${stats.length ? `<div class="wrap"><table>
+        <tr><th>Baju</th><th>Kali disewa</th><th>Utilisasi</th><th>Pendapatan</th><th style="min-width:150px">Balik modal</th></tr>
+        ${stats.map(s => `<tr>
+          <td>${esc(s.i.code)} · ${esc(s.i.name)}</td>
+          <td>${s.count}</td>
+          <td>${s.util.toFixed(0)}%</td>
+          <td>${rp(s.earned)}</td>
+          <td>${s.payback.toFixed(0)}%<div class="progress"><div style="width:${s.payback}%"></div></div></td>
+        </tr>`).join('')}
+      </table></div>` : '<p class="empty">Tambahkan baju untuk melihat performanya.</p>'}
+    </div>
+  `;
+}
+
+// ===== BACKUP =====
+function showExport(){
+  $('exportBox').value = JSON.stringify(DB);
+  $('exportBox').select();
+}
+function importData(){
+  try{
+    const d = JSON.parse($('importBox').value);
+    if(!d || !Array.isArray(d.items) || !Array.isArray(d.rentals) || !Array.isArray(d.expenses)) throw new Error('format');
+    if(!confirm('Data sekarang akan diganti dengan data backup. Lanjutkan?')) return;
+    DB = {items:d.items, rentals:d.rentals, expenses:d.expenses};
+    save(); renderAll();
+    $('importMsg').textContent = 'Data berhasil dimuat.';
+  }catch(e){
+    $('importMsg').textContent = 'Teks backup tidak valid.';
+  }
+}
+
+// ===== RESET =====
+function resetData(mode){
+  const label = mode === 'all' ? 'SEMUA data (stok, sewa, dan pengeluaran)' : 'riwayat sewa dan pengeluaran (daftar stok tetap)';
+  if(!confirm('Kamu akan menghapus ' + label + '.\n\nSudah buat backup? Data yang dihapus tidak bisa dikembalikan.')) return;
+  if(prompt('Ketik RESET (huruf besar) untuk melanjutkan:') !== 'RESET'){ alert('Dibatalkan.'); return; }
+  if(mode === 'all'){ DB = {items:[], rentals:[], expenses:[]}; }
+  else { DB.rentals = []; DB.expenses = []; }
+  save(); renderAll();
+  $('importMsg').textContent = 'Data sudah direset.';
+}
+
+// ===== SINKRONISASI GOOGLE SHEET =====
+const SYNC = JSON.parse(localStorage.getItem('sewabaju-sync') || '{"url":"","key":""}');
+$('syncUrl').value = SYNC.url || '';
+$('syncKey').value = SYNC.key || '';
+let pushTimer = null;
+function pushSoon(){
+  if(!SYNC.url || !SYNC.key) return;
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(syncPush, 1500);
+}
+function saveSync(){
+  SYNC.url = $('syncUrl').value.trim(); SYNC.key = $('syncKey').value.trim();
+  localStorage.setItem('sewabaju-sync', JSON.stringify(SYNC));
+  $('syncMsg').textContent = SYNC.url ? 'Pengaturan disimpan.' : 'URL kosong, sinkronisasi dimatikan.';
+}
+async function syncPush(){
+  if(!SYNC.url || !SYNC.key){ $('syncMsg').textContent = 'Isi URL dan kata sandi dulu.'; return; }
+  try{
+    await fetch(SYNC.url, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({key:SYNC.key, items:DB.items, rentals:DB.rentals, expenses:DB.expenses})});
+    $('syncMsg').textContent = 'Data terkirim ' + new Date().toLocaleTimeString('id-ID') + '. Cek Sheet beberapa detik lagi.';
+  }catch(e){ $('syncMsg').textContent = 'Gagal mengirim. Periksa URL dan koneksi internet.'; }
+}
+async function syncPull(){
+  if(!SYNC.url || !SYNC.key){ $('syncMsg').textContent = 'Isi URL dan kata sandi dulu.'; return; }
+  try{
+    const res = await fetch(SYNC.url + '?key=' + encodeURIComponent(SYNC.key));
+    const d = await res.json();
+    if(d.error){ $('syncMsg').textContent = 'Kata sandi salah.'; return; }
+    if(!confirm('Ambil data dari Sheet akan menggantikan data di browser ini. Lanjutkan?')) return;
+    DB = {items:d.items||[], rentals:d.rentals||[], expenses:d.expenses||[]};
+    localStorage.setItem(KEY, JSON.stringify(DB));
+    renderAll();
+    $('syncMsg').textContent = 'Data berhasil diambil dari Sheet.';
+  }catch(e){ $('syncMsg').textContent = 'Gagal mengambil data. Periksa URL dan koneksi.'; }
+}
+
+// ===== PENGATURAN =====
+const SETDEF = {
+  name: 'Gaul Studio', accent: '#6a2cf5',
+  cats: ['Kebaya','Gaun','Jas','Batik','Lainnya'],
+  conds: ['Baik','Cukup','Perlu perbaikan'],
+  expCats: ['Laundry','Dry clean','Packaging','Iklan','Sewa tempat','Listrik','Transport','Perbaikan baju','Lainnya']
+};
+let SET = Object.assign({}, SETDEF, JSON.parse(localStorage.getItem('sewabaju-settings') || '{}'));
+
+function fillSelect(id, list){
+  const el = $(id), prev = el.value;
+  el.innerHTML = list.map(x => `<option>${esc(x)}</option>`).join('');
+  if(list.includes(prev)) el.value = prev;
+}
+function applySettings(){
+  document.title = SET.name;
+  $('brandName').textContent = SET.name;
+  document.documentElement.style.setProperty('--teal', SET.accent);
+  fillSelect('i_cat', SET.cats);
+  fillSelect('i_cond', SET.conds);
+  fillSelect('e_cat', SET.expCats);
+  $('setName').value = SET.name;
+  $('setAccent').value = SET.accent;
+  $('setCats').value = SET.cats.join('\n');
+  $('setCond').value = SET.conds.join('\n');
+  $('setExp').value = SET.expCats.join('\n');
+}
+function saveSettings(){
+  const lines = s => s.split('\n').map(x => x.trim()).filter(Boolean);
+  const cats = lines($('setCats').value), conds = lines($('setCond').value), exp = lines($('setExp').value);
+  SET = {
+    name: $('setName').value.trim() || SETDEF.name,
+    accent: $('setAccent').value || SETDEF.accent,
+    cats: cats.length ? cats : SETDEF.cats,
+    conds: conds.length ? conds : SETDEF.conds,
+    expCats: exp.length ? exp : SETDEF.expCats
+  };
+  localStorage.setItem('sewabaju-settings', JSON.stringify(SET));
+  applySettings(); renderAll();
+  $('setMsg').textContent = 'Pengaturan disimpan.';
+}
+function resetSettings(){
+  if(!confirm('Kembalikan semua pengaturan ke bawaan?')) return;
+  localStorage.removeItem('sewabaju-settings');
+  SET = Object.assign({}, SETDEF);
+  applySettings(); renderAll();
+  $('setMsg').textContent = 'Pengaturan dikembalikan.';
+}
+// ===== KUNCI PENGATURAN =====
+const PW_DEFAULT = '123456789';
+let unlocked = false;
+function pwHash(s){
+  let h = 5381;
+  for(const c of s) h = ((h << 5) + h + c.charCodeAt(0)) | 0;
+  return 'h' + (h >>> 0).toString(16);
+}
+function storedPwHash(){
+  return localStorage.getItem('sewabaju-pw') || pwHash(PW_DEFAULT);
+}
+function showSet(){
+  $('setLock').classList.toggle('hide', unlocked);
+  $('setBody').classList.toggle('hide', !unlocked);
+}
+function unlock(){
+  if(pwHash($('pwIn').value) === storedPwHash()){
+    unlocked = true; $('pwIn').value = ''; $('pwMsg').textContent = '';
+    showSet();
+  } else {
+    $('pwMsg').textContent = 'Kata sandi salah.';
+  }
+}
+function changePw(){
+  const a = $('pwNew').value, b = $('pwNew2').value;
+  if(a.length < 6){ $('pwMsg2').textContent = 'Kata sandi minimal 6 karakter.'; return; }
+  if(a !== b){ $('pwMsg2').textContent = 'Ulangi kata sandi belum sama.'; return; }
+  localStorage.setItem('sewabaju-pw', pwHash(a));
+  $('pwNew').value = ''; $('pwNew2').value = '';
+  $('pwMsg2').textContent = 'Kata sandi berhasil diganti.';
+}
+
+applySettings();
+showSet();
+
+// ===== Init =====
+$('e_date').value = TODAY();
+renderAll();
+</script>
+</body>
+</html>
